@@ -1,21 +1,10 @@
-package com.example.socialnetwork.model;
+package com.example.socialnetwork.dto;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import java.util.HashSet;
-import java.util.Set;
-
-@Entity
-@Table(name = "users")
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class RegisterRequest {
 
     @NotBlank(message = "Username is mandatory")
     @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
@@ -29,23 +18,6 @@ public class User {
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$",
             message = "Password must be at least 8 characters long, contain at least one digit, one lower case, one upper case, one special character and no whitespace")
     private String password;
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    private Set<String> roles = new HashSet<>();
-
-    @PrePersist
-    @PreUpdate
-    public void hashPassword() {
-        this.password = new BCryptPasswordEncoder().encode(this.password);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getUsername() {
         return username;
@@ -71,11 +43,4 @@ public class User {
         this.password = password;
     }
 
-    public Set<String> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<String> roles) {
-        this.roles = roles;
-    }
 }

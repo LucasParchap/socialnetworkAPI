@@ -2,6 +2,9 @@ package com.example.socialnetwork.controller;
 
 import com.example.socialnetwork.dto.AuthenticationResponse;
 import com.example.socialnetwork.dto.LoginRequest;
+import com.example.socialnetwork.dto.RegisterRequest;
+import com.example.socialnetwork.dto.RegisterResponse;
+import com.example.socialnetwork.mapper.UserMapper;
 import com.example.socialnetwork.model.User;
 import com.example.socialnetwork.service.UserService;
 import com.example.socialnetwork.util.JwtUtil;
@@ -14,9 +17,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collections;
-import java.util.HashSet;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -32,16 +32,18 @@ public class AuthController {
     private JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody User user) {
-        if (userService.findByUsername(user.getUsername()).isPresent()) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
+        if (userService.findByUsername(registerRequest.getUsername()).isPresent()) {
             return ResponseEntity.badRequest().body("Username is already taken");
         }
-        if (userService.findByEmail(user.getEmail()).isPresent()) {
+        if (userService.findByEmail(registerRequest.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body("Email is already in use");
         }
-        user.setRoles(new HashSet<>(Collections.singletonList("ROLE_USER")));
+
+        User user = UserMapper.toUser(registerRequest);
         userService.saveUser(user);
-        return ResponseEntity.ok("User registered successfully");
+
+        return ResponseEntity.ok(new RegisterResponse("User registered successfully"));
     }
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
